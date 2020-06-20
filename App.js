@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, FlatList } from 'react-native';
-
+import { StyleSheet, Text, View, FlatList } from 'react-native';
+import ContactInput from './components/ContactInput';
+import ContactItem from './components/ContactItem';
+0
 export default function App() {
-  let [ name, setName ] = useState('');
-  let [ number, setNumber ] = useState('');
+
   let [ contacts, setContacts ] = useState([]);
   let [countContacts, setCountContacts] = useState(0);
 
-  // get name
-  const getName = (name) => {
-    setName(name);
-  }
-
-  // get number 
-  const getNumber = (number) =>{
-    setNumber(number);
-  }
-
-  // adc contact 
-  const addContact = () => {
+  const addContact = (name, number) => {
     let contact = {name: name, number: number};
     
     if (name == '' || number == '') return alert('Preencha todos campos!');
@@ -27,35 +17,35 @@ export default function App() {
      setCountContacts(countContacts + 1);
      return [ {key: countContacts.toString(), value: contact }, ...contacts ]
     });
+  }
 
-    setName('');
-    setNumber('');
+  const deleteAll = () => {
+    setContacts([]);
+  }
+
+  const removeContact = (keyDeleteNow) => {
+    setContacts(contacts => {
+      return contacts.filter((contact) => {
+        return contact.key !== keyDeleteNow
+      });
+    });
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.contactListText}>Agenda de Contatos</Text>
-      {/* inserindo opção para adicionar usuário. */}
-      <View style={styles.insertContact}> 
-        <View style={styles.sectionTextInput}>
-          <Text style={{ alignSelf: 'center' }}>Insira o nome:</Text>
-          <TextInput style={styles.nameTextInput} onChangeText={getName} value={name} placeholder="Exemplo: Maria" />
-        </View>
-        <View style={styles.sectionTextInput}>
-          <Text style={{ alignSelf: 'center' }}>Insira o número:</Text>
-          <TextInput maxLength={11} style={styles.numberTextInput} onChangeText={getNumber} value={number} placeholder="Exemplo: 11945790465" />
-        </View>
-        <Button color="#FF7043" title="Adicionar contato" onPress={addContact}/>
-      </View>
-      {/* listando contatos adicionados */}
+      <ContactInput onAddContact={addContact} onDeleteAll={deleteAll} />
       <View>
         <FlatList 
           data={contacts}
           renderItem={
             contact => 
-            <View style={styles.contactView} key={contact.item.key}>
-              <Text style={{ textAlign: 'center' }}>{contact.item.value.name} - {contact.item.value.number}</Text>
-            </View>
+            <ContactItem 
+              name={contact.item.value.name}
+              number={contact.item.value.number}
+              keyDelete={contact.item.key}
+              onDelete={removeContact}
+            />
           }
         />
       </View>
